@@ -7,6 +7,7 @@ public class PlayerMovement : MonoBehaviour
 {
     private Rigidbody2D playerRB;
     private Animator playerAnimator;
+    private ColourManager playerCM;
     public Transform reticle;
 
     [SerializeField] private float speed;
@@ -25,8 +26,11 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
+        Cursor.visible = false;
+
         playerRB = GetComponent<Rigidbody2D>();
         playerAnimator = GetComponent<Animator>();
+        playerCM = GetComponent<ColourManager>();
     }
 
     private void FixedUpdate()
@@ -119,7 +123,9 @@ public class PlayerMovement : MonoBehaviour
     {
         if(collision.transform.tag == "Enemy")
         {
-            if (isDashing)
+            ColourManager enemyCM = collision.transform.GetComponent<ColourManager>();
+
+            if (playerCM.currentColour == enemyCM.currentColour)
             {
                 Destroy(collision.gameObject);
             }
