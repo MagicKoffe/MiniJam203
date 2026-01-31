@@ -6,11 +6,24 @@ using UnityEngine;
 public class EnemyFlyer : MonoBehaviour
 {
     private Transform player;
+    private Rigidbody2D enemyRB;
     [SerializeField] float speed;
 
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
+        enemyRB = GetComponent<Rigidbody2D>();
+    }
+
+
+    private void FixedUpdate()
+    {
+        moveTowardsPlayer();
+    }
+
+    private void moveTowardsPlayer()
+    {
+        enemyRB.AddForce(transform.up * speed);
     }
 
     // Update is called once per frame
