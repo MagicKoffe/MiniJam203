@@ -6,8 +6,8 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     private Rigidbody2D playerRB;
+    private Animator playerAnimator;
     public Transform reticle;
-    public Transform compass;
 
     [SerializeField] private float speed;
     [SerializeField] private float maxSpeed;
@@ -19,19 +19,21 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
 
     Vector2 mouseDirection;
-    bool disableMove;
+    bool isDashing = false;
     Vector2 moveDirection;
     private bool hasUsedAirJump = false;
 
     void Start()
     {
         playerRB = GetComponent<Rigidbody2D>();
+        playerAnimator = GetComponent<Animator>();
     }
 
     private void FixedUpdate()
     {
-        if (disableMove)
+        if (isDashing)
             return;
+
         movePlayer();
     }
 
@@ -100,15 +102,31 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator Dash()
     {
-        disableMove = true;
+        isDashing = true;
+        playerAnimator.SetTrigger("Dash");
         playerRB.AddForce(mouseDirection * dashForce, ForceMode2D.Impulse);
         yield return new WaitForSeconds(0.5f);
-        disableMove = false;
+        isDashing = false;
     }
 
     private void Jump()
     {
         playerRB.velocity = new Vector2(playerRB.velocity.x, 0f);
         playerRB.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if(collision.transform.tag == "Enemy")
+        {
+            if (isDashing)
+            {
+                Destroy(collision.gameObject);
+            }
+            else
+            {
+                gameObject.SetActive(false);
+            }
+        }
     }
 }
