@@ -21,4 +21,10 @@ public class ColourManager : MonoBehaviour
         }
     }
 
+    public void setRandomColour()
+    {
+        currentColour = UnityEngine.Random.Range(0, 2);
+
+    }
+
 }

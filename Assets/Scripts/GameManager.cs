@@ -4,11 +4,18 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI colourSwapTimer;
     [SerializeField] TextMeshProUGUI score;
+
+    public GameObject deathUI;
+    bool gameActive;
+
+    public GameObject enemyPrefab;
+    public Transform[] SpawnPoints;
 
     ColourManager playerCM;
     bool startTimer;
@@ -19,9 +26,12 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        gameActive = true;
+        deathUI.SetActive(false);
         playerCM = GameObject.FindGameObjectWithTag("Player").GetComponent<ColourManager>();
         colourSwapTimer.text = "";
-        InvokeRepeating("addTimePoint", 0, 1);
+        InvokeRepeating("addTimePoint", 0, 3);
+        InvokeRepeating("enemySpawner", 1, 5);
     }
 
     private void Update()
@@ -65,6 +75,40 @@ public class GameManager : MonoBehaviour
 
     void addTimePoint()
     {
+        if (!gameActive)
+            return;
+
         currentScore++;
+    }
+
+    public void addkillScore()
+    {
+        if (!gameActive)
+            return;
+
+        currentScore += 5;
+    }
+
+    public void gameOver()
+    {
+        deathUI.SetActive(true);
+        gameActive = false;
+    }
+
+    public void resetGame()
+    {
+        SceneManager.LoadScene("MainGame");
+    }
+
+    private void enemySpawner()
+    {
+        if (!gameActive)
+            return;
+
+        int randomSpawn = UnityEngine.Random.Range(0, SpawnPoints.Length);
+        GameObject tempEnemy = Instantiate(enemyPrefab, SpawnPoints[randomSpawn]);
+        tempEnemy.transform.localPosition = Vector3.zero;
+        tempEnemy.transform.parent = null;
+        tempEnemy.GetComponent<ColourManager>().setRandomColour();
     }
 }

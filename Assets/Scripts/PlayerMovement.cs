@@ -5,10 +5,15 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    GameManager gm;
+
     private Rigidbody2D playerRB;
     private Animator playerAnimator;
     private ColourManager playerCM;
     public Transform reticle;
+    public GameObject deathParticle;
+    public GameObject playerAvatar;
+    private TrailRenderer _trailRenderer;
 
     [SerializeField] private float speed;
     [SerializeField] private float maxSpeed;
@@ -19,6 +24,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Vector2 playerSize;
     [SerializeField] private LayerMask groundLayer;
 
+    bool isDead = false;
     Vector2 mouseDirection;
     bool isDashing = false;
     Vector2 moveDirection;
@@ -28,14 +34,18 @@ public class PlayerMovement : MonoBehaviour
     {
         Cursor.visible = false;
 
+        gm = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
+        deathParticle.SetActive(false);
+        _trailRenderer = GetComponent<TrailRenderer>();
         playerRB = GetComponent<Rigidbody2D>();
         playerAnimator = GetComponent<Animator>();
         playerCM = GetComponent<ColourManager>();
+        _trailRenderer.enabled = false;
     }
 
     private void FixedUpdate()
     {
-        if (isDashing)
+        if (isDashing || isDead)
             return;
 
         movePlayer();
@@ -108,15 +118,25 @@ public class PlayerMovement : MonoBehaviour
     {
         isDashing = true;
         playerAnimator.SetTrigger("Dash");
+        _trailRenderer.enabled = true;
         playerRB.AddForce(mouseDirection * dashForce, ForceMode2D.Impulse);
         yield return new WaitForSeconds(0.5f);
         isDashing = false;
+        _trailRenderer.enabled = false;
     }
 
     private void Jump()
     {
         playerRB.velocity = new Vector2(playerRB.velocity.x, 0f);
         playerRB.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+    }
+
+    private void killPlayer()
+    {
+        deathParticle.SetActive(true);
+        isDead = true;
+        playerAvatar.SetActive(false);
+        gm.gameOver();
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -127,12 +147,17 @@ public class PlayerMovement : MonoBehaviour
 
             if (playerCM.currentColour == enemyCM.currentColour)
             {
-                Destroy(collision.gameObject);
+                collision.transform.GetComponent<EnemyFlyer>().killed();
             }
             else
             {
-                gameObject.SetActive(false);
+                killPlayer();
             }
+        }
+
+        if (collision.transform.tag == "death")
+        {
+            killPlayer();
         }
     }
 }

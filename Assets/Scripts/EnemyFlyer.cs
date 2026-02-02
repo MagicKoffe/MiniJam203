@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class EnemyFlyer : MonoBehaviour
 {
+    private GameManager gm;
     private Transform player;
     private SpriteRenderer enemySR;
     private Rigidbody2D enemyRB;
@@ -18,8 +19,9 @@ public class EnemyFlyer : MonoBehaviour
         enemyRB = GetComponent<Rigidbody2D>();
         enemyCM = GetComponent<ColourManager>();
         enemySR = GetComponentInChildren<SpriteRenderer>();
+        gm = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
 
-        if(enemyCM.currentColour == 1)
+        if (enemyCM.currentColour == 1)
         {
             currentColour = Color.blue;
         }
@@ -29,6 +31,12 @@ public class EnemyFlyer : MonoBehaviour
         }
 
         enemySR.color = currentColour;
+    }
+
+    public void killed()
+    {
+        gm.addkillScore();
+        Destroy(gameObject);
     }
 
     private void FixedUpdate()
